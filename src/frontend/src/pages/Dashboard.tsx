@@ -1,15 +1,42 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import { Heart, CheckCircle2, Clock4, Map as MapIcon, Database, ArrowUpRight, ShieldCheck, TrendingUp } from 'lucide-react';
+import { Heart, CheckCircle2, Clock4, Map as MapIcon, Database, ArrowUpRight, ShieldCheck, TrendingUp, Loader2 } from 'lucide-react';
+import api from '../services/api';
 
 export default function Dashboard() {
   const role = useAuthStore((state) => state.role);
+  const [metrics, setMetrics] = useState({ open: 0, inProgress: 0, resolved: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchMetrics = async () => {
+    try {
+      const res = await api.get('/tickets');
+      const tickets = res.data || [];
+      
+      const open = tickets.filter((t: any) => t.status === 'Open').length;
+      const inProgress = tickets.filter((t: any) => t.status === 'In Progress').length;
+      const resolved = tickets.filter((t: any) => t.status === 'Resolved').length;
+
+      setMetrics({ open, inProgress, resolved });
+    } catch (error) {
+      console.error("Failed to fetch dashboard metrics:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 5000); // Polling every 5 seconds for real-time updates
+    return () => clearInterval(interval);
+  }, []);
 
   const stats = [
     {
       label: 'Active Requests',
-      value: '142',
-      delta: '+12 today',
+      value: isLoading ? '...' : metrics.open.toString(),
+      delta: 'Open Tickets',
       icon: Heart,
       accent: '#ef4444',
       bg: 'bg-red-50',
@@ -18,8 +45,8 @@ export default function Dashboard() {
     },
     {
       label: 'Units Deployed',
-      value: '38',
-      delta: 'Active now',
+      value: isLoading ? '...' : metrics.inProgress.toString(),
+      delta: 'In Progress',
       icon: Clock4,
       accent: '#f59e0b',
       bg: 'bg-amber-50',
@@ -28,8 +55,8 @@ export default function Dashboard() {
     },
     {
       label: 'Missions Completed',
-      value: '89',
-      delta: '+7 this week',
+      value: isLoading ? '...' : metrics.resolved.toString(),
+      delta: 'Resolved',
       icon: CheckCircle2,
       accent: '#10b981',
       bg: 'bg-emerald-50',

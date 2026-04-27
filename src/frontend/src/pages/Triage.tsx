@@ -9,7 +9,17 @@ export default function Triage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Custom Reporter & Location State
+  const [showModal, setShowModal] = useState(false);
+  const [raisedBy, setRaisedBy] = useState('');
+  const [phoneNo, setPhoneNo] = useState('');
+  const [district, setDistrict] = useState('');
+  const [village, setVillage] = useState('');
+  const [lat, setLat] = useState('16.5');
+  const [lng, setLng] = useState('80.6');
+  
   const role = useAuthStore((state) => state.role);
+  const user = useAuthStore((state) => state.user);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -33,31 +43,35 @@ export default function Triage() {
 
   useEffect(() => {
     fetchTickets();
-    // Optional: Set up polling
     const interval = setInterval(fetchTickets, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = async () => {
+  const handleOpenModal = () => {
     if (!prompt.trim() || isSubmitting) return;
+    setShowModal(true);
+  };
 
+  const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     try {
+      const defaultName = user?.email ? user.email.split('@')[0] : (role === 'ADMIN' ? 'Command Center' : 'Field Volunteer');
       const payload = {
-        raised_by: role === 'ADMIN' ? 'Command Center' : 'Field Volunteer',
-        phone_no: "+910000000000",
+        raised_by: raisedBy.trim() || defaultName,
+        phone_no: phoneNo.trim() || "+910000000000",
         description: prompt,
         created_at: new Date().toISOString(),
         location: {
-          district: "Unspecified",
-          village: "Current Location",
-          lat: 16.5,
-          lng: 80.6
+          district: district.trim() || "Unspecified",
+          village: village.trim() || "Current Location",
+          lat: parseFloat(lat) || 16.5,
+          lng: parseFloat(lng) || 80.6
         }
       };
 
       await api.post('/create-ticket', payload);
       setPrompt('');
+      setShowModal(false);
       await fetchTickets(); // Refresh feed immediately
     } catch (error) {
       console.error("Failed to submit prompt:", error);
@@ -69,7 +83,7 @@ export default function Triage() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit();
+      handleOpenModal();
     }
   };
 
@@ -119,7 +133,7 @@ export default function Triage() {
             
             <div className="flex items-center justify-end mt-1">
               <button 
-                onClick={handleSubmit}
+                onClick={handleOpenModal}
                 disabled={!prompt.trim() || isSubmitting}
                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${prompt.trim() && !isSubmitting ? 'bg-accent hover:bg-blue-600 text-white shadow-md hover:shadow-lg' : 'bg-slate-100 text-slate-400'}`}
               >
@@ -143,6 +157,63 @@ export default function Triage() {
           ))}
         </div>
       </div>
+
+      {/* Pop-up Modal for Details */}
+      {showModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={() => setShowModal(false)} />
+          <div className="relative bg-white/90 backdrop-blur-xl border border-white/80 shadow-[0_20px_60px_rgba(0,0,0,0.1)] rounded-[2rem] p-6 sm:p-8 w-full max-w-lg flex flex-col reveal-d2">
+            <div className="mb-6 text-center">
+              <h3 className="text-[24px] font-bold tracking-tight text-slate-800">Final Details</h3>
+              <p className="text-[14px] text-slate-500 mt-1">Please confirm your contact and location information.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">Reporter Name</label>
+                <input type="text" placeholder={user?.email ? user.email.split('@')[0] : 'Auto'} value={raisedBy} onChange={e => setRaisedBy(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">Phone Number</label>
+                <input type="text" placeholder="+91..." value={phoneNo} onChange={e => setPhoneNo(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">District</label>
+                <input type="text" placeholder="Unspecified" value={district} onChange={e => setDistrict(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">Village/Area</label>
+                <input type="text" placeholder="Current Location" value={village} onChange={e => setVillage(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">Latitude</label>
+                <input type="text" placeholder="16.5" value={lat} onChange={e => setLat(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">Longitude</label>
+                <input type="text" placeholder="80.6" value={lng} onChange={e => setLng(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button 
+                onClick={() => setShowModal(false)}
+                className="px-5 py-2.5 rounded-xl text-[14px] font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleFinalSubmit}
+                disabled={isSubmitting}
+                className="px-6 py-2.5 rounded-xl text-[14px] font-bold text-white bg-accent hover:bg-blue-600 shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                Submit Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Right Notifications */}
       <div className="fixed bottom-8 right-6 xl:right-8 z-30 w-[280px] flex flex-col gap-3 reveal reveal-d3 hidden xl:flex">
