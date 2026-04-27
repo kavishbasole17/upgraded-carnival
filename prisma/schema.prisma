@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Organization {
+  id      String   @id @default(cuid())
+  name    String
+  users   User[]
+  tasks   Task[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  name           String
+  email          String       @unique
+  passwordHash   String
+  role           Role         @default(USER)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model Task {
+  id             String     @id @default(cuid())
+  description    String
+  priority       Priority   @default(MEDIUM)
+  status         TaskStatus @default(OPEN)
+  lat            Float
+  lng            Float
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime   @default(now())
+}
+
+model PromptHistory {
+  id               String   @id @default(cuid())
+  input            String
+  assignedPriority Priority
+  status           TaskStatus @default(OPEN)
+  createdAt        DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
