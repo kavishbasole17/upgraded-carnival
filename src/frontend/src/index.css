@@ -141,3 +141,12 @@ body {
 
 @keyframes pulse-glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 .pulse-slow { animation: pulse-glow 3s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════
+   LEAFLET MAP
+   ═══════════════════════════════════════════ */
+.leaflet-container {
+  background: transparent !important;
+  font-family: var(--font-sans);
+}
+
