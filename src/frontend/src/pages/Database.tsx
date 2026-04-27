@@ -25,7 +25,10 @@ export default function Database() {
         setIsLoading(false);
       }
     };
+    
     fetchTickets();
+    const intervalId = setInterval(fetchTickets, 5000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleDelete = async (ticket_id: string) => {

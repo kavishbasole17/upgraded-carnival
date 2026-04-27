@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { MapPin } from 'lucide-react';
 import api from '../services/api';
 import MapLayer from '../components/MapLayer';
@@ -28,23 +28,23 @@ export default function Heatmap() {
       const res = await api.get('/tickets');
       const tickets = res.data || [];
       const openTickets = tickets.filter((t: any) => t.status === 'Open');
-      
+
       setRawTickets(openTickets);
-      
+
       const newHeatData: Record<string, any> = {};
       openTickets.forEach((t: any) => {
         const dist = t.district;
         if (!dist) return;
-        
+
         if (!newHeatData[dist]) {
           newHeatData[dist] = { score: 0, count: 0 };
         }
-        
+
         // Sum up the priority scores for the heatmap intensity
         newHeatData[dist].score += (t.priority_score || 0);
         newHeatData[dist].count += 1;
       });
-      
+
       setHeatData(newHeatData);
     } catch (error) {
       console.error("Failed to fetch tickets:", error);
@@ -114,9 +114,9 @@ export default function Heatmap() {
           )}
         </div>
 
-        <TicketList 
-          district={selectedDistrict} 
-          tickets={filteredTickets} 
+        <TicketList
+          district={selectedDistrict}
+          tickets={filteredTickets}
           onAssign={handleAssign}
         />
       </div>

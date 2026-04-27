@@ -43,7 +43,7 @@ export default function Triage() {
 
   useEffect(() => {
     fetchTickets();
-    const interval = setInterval(fetchTickets, 10000);
+    const interval = setInterval(fetchTickets, 5000);
     return () => clearInterval(interval);
   }, []);
 

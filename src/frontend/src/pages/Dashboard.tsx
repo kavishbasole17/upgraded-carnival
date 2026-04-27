@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import { Heart, CheckCircle2, Clock4, Map as MapIcon, Database, ArrowUpRight, ShieldCheck, TrendingUp, Loader2 } from 'lucide-react';
+import { Heart, CheckCircle2, Clock4, Map as MapIcon, Database, ArrowUpRight, ShieldCheck, TrendingUp } from 'lucide-react';
 import api from '../services/api';
 
 export default function Dashboard() {
