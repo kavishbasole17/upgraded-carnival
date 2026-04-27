@@ -35,7 +35,8 @@ def create_ticket(ticket: TicketInput):
             "llm_score": llm.get('priority_score', 0),
             "llm_reason": llm.get('reason', 'None'),
             "status": "Open",
-            "created_at": ticket.created_at.isoformat()
+            "created_at": ticket.created_at.isoformat(),
+            "volunteer_assigned": False,
         }
 
         if supabase:

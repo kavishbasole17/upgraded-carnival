@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { HeartHandshake, ShieldCheck, Users, ArrowRight, Mail, Lock, AlertCircle, Globe } from 'lucide-react';
-
 import { supabase } from '../lib/supabase';
 
 export default function Login() {
@@ -45,14 +44,16 @@ export default function Login() {
       
       useAuthStore.getState().login(role, signUpData.user);
       setLoading(false);
-      navigate('/');
+      navigate(role === 'USER' ? '/triage' : '/');
       return;
     }
     
-    const userRole = data.user.user_metadata?.role || role;
-    useAuthStore.getState().login(userRole, data.user);
+    // Force update the user's role in Supabase so the button click always dictates the current session role
+    const { data: updatedUser } = await supabase.auth.updateUser({ data: { role: role } });
+    
+    useAuthStore.getState().login(role, updatedUser?.user || data.user);
     setLoading(false);
-    navigate('/');
+    navigate(role === 'USER' ? '/triage' : '/');
   };
 
   return (
