@@ -23,12 +23,6 @@ export default function Login() {
         <div className="glass-strong rounded-3xl p-10 relative overflow-hidden">
           <div className="absolute top-0 left-6 right-6 h-px bg-white/[0.06]" />
 
-          <div className="flex gap-2 mb-10">
-            <div className="w-3 h-3 rounded-full bg-[#ff5f57]/90" />
-            <div className="w-3 h-3 rounded-full bg-[#febc2e]/90" />
-            <div className="w-3 h-3 rounded-full bg-[#28c840]/90" />
-          </div>
-
           <div className="text-center mb-10">
             <div className="w-[72px] h-[72px] glass rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_-8px_rgba(99,102,241,0.3)]">
               <Shield className="w-8 h-8 text-accent" />
