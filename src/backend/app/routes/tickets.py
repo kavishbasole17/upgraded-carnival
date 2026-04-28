@@ -6,18 +6,20 @@ from app.services.fusion_engine import fuse
 from app.utils.ticket_id import generate_ticket_id
 from app.db.supabase_client import supabase
 from loguru import logger
-from typing import Optional
 
 router = APIRouter()
 
-def get_org_id(request: Request) -> Optional[str]:
-    """Extract org_id from the X-Org-Id request header."""
-    return request.headers.get("x-org-id")
+def require_org_id(request: Request) -> str:
+    """Extract and validate org_id from the X-Org-Id request header. Raises 403 if missing."""
+    org_id = request.headers.get("x-org-id")
+    if not org_id:
+        raise HTTPException(status_code=403, detail="Missing organization. Please log out and sign in again.")
+    return org_id
 
 @router.post('/create-ticket', response_model=TicketResponse)
 def create_ticket(ticket: TicketInput, request: Request):
     try:
-        org_id = get_org_id(request)
+        org_id = require_org_id(request)
         rule = rule_score(ticket.description)
         llm = llm_priority(ticket.description)
 
@@ -53,6 +55,8 @@ def create_ticket(ticket: TicketInput, request: Request):
 
         return payload
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error creating ticket: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -63,15 +67,12 @@ def get_tickets(request: Request):
         if not supabase:
             raise HTTPException(status_code=500, detail="Supabase not configured")
         
-        org_id = get_org_id(request)
-        query = supabase.table("tickets").select("*")
-        
-        if org_id:
-            query = query.eq("org_id", org_id)
-        
-        response = query.order("created_at", desc=True).execute()
+        org_id = require_org_id(request)
+        response = supabase.table("tickets").select("*").eq("org_id", org_id).order("created_at", desc=True).execute()
         return response.data
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error fetching tickets: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -86,14 +87,11 @@ def update_ticket_status(ticket_id: str, payload: StatusUpdate, request: Request
         if not supabase:
             raise HTTPException(status_code=500, detail="Supabase not configured")
         
-        org_id = get_org_id(request)
-        query = supabase.table("tickets").update({"status": payload.status}).eq("ticket_id", ticket_id)
-        
-        if org_id:
-            query = query.eq("org_id", org_id)
-        
-        response = query.execute()
+        org_id = require_org_id(request)
+        response = supabase.table("tickets").update({"status": payload.status}).eq("ticket_id", ticket_id).eq("org_id", org_id).execute()
         return {"message": "Status updated successfully", "data": response.data}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error updating status for {ticket_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -104,15 +102,13 @@ def delete_ticket(ticket_id: str, request: Request):
         if not supabase:
             raise HTTPException(status_code=500, detail="Supabase not configured")
         
-        org_id = get_org_id(request)
-        query = supabase.table("tickets").delete().eq("ticket_id", ticket_id)
-        
-        if org_id:
-            query = query.eq("org_id", org_id)
-        
-        response = query.execute()
+        org_id = require_org_id(request)
+        response = supabase.table("tickets").delete().eq("ticket_id", ticket_id).eq("org_id", org_id).execute()
         return {"message": "Ticket deleted successfully"}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error deleting ticket {ticket_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 

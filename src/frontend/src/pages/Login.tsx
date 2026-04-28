@@ -24,19 +24,17 @@ export default function Login() {
       setError('Please enter both your email and password.');
       return;
     }
+
+    if (!orgName.trim()) {
+      setError('Please enter your organization name.');
+      return;
+    }
+
+    const org_id = orgName.trim().toLowerCase().replace(/\s+/g, '-');
     
     setLoading(true);
 
     if (isSignUp) {
-      if (!orgName.trim()) {
-        setError('Please enter your organization name.');
-        setLoading(false);
-        return;
-      }
-
-      // Generate a consistent org_id from the org name (lowercase, no spaces)
-      const org_id = orgName.trim().toLowerCase().replace(/\s+/g, '-');
-
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -81,8 +79,10 @@ export default function Login() {
       return;
     }
     
-    // Force update the user's role in Supabase so the button click always dictates the current session role
-    const { data: updatedUser } = await supabase.auth.updateUser({ data: { role: role } });
+    // Always update user metadata with role AND org_id (handles users who signed up before this feature)
+    const { data: updatedUser } = await supabase.auth.updateUser({
+      data: { role, org_id, org_name: orgName.trim() }
+    });
     
     useAuthStore.getState().login(role, updatedUser?.user || data.user);
     setLoading(false);
@@ -155,23 +155,21 @@ export default function Login() {
             )}
 
             <div className="space-y-5 mb-10">
-              {isSignUp && (
-                <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-text-secondary uppercase tracking-[0.05em] ml-1">Organization Name</label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <HeartHandshake className="h-4 w-4 text-slate-400 group-focus-within:text-accent" />
-                    </div>
-                    <input
-                      type="text"
-                      value={orgName}
-                      onChange={(e) => setOrgName(e.target.value)}
-                      className="w-full glass-inset bg-white/60 rounded-2xl py-3.5 pl-11 pr-4 text-[15px] focus:bg-white transition-all shadow-sm border-white"
-                      placeholder="Red Cross, UNICEF, etc."
-                    />
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-text-secondary uppercase tracking-[0.05em] ml-1">Organization Name</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <HeartHandshake className="h-4 w-4 text-slate-400 group-focus-within:text-accent" />
                   </div>
+                  <input
+                    type="text"
+                    value={orgName}
+                    onChange={(e) => setOrgName(e.target.value)}
+                    className="w-full glass-inset bg-white/60 rounded-2xl py-3.5 pl-11 pr-4 text-[15px] focus:bg-white transition-all shadow-sm border-white"
+                    placeholder="Red Cross, UNICEF, etc."
+                  />
                 </div>
-              )}
+              </div>
 
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-text-secondary uppercase tracking-[0.05em] ml-1">Email Address</label>
