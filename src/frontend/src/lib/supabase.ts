@@ -1,7 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Fallbacks prevent the entire app from white-screening if env vars are missing on Vercel
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY || 'placeholder-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl || !supabaseKey) {
+  console.error(
+    '⚠️ Supabase environment variables are missing!\n' +
+    'Set VITE_SUPABASE_URL and VITE_SUPABASE_KEY in your Vercel project settings.\n' +
+    `Current values — URL: "${supabaseUrl}", KEY: "${supabaseKey ? '***' : undefined}"`
+  );
+}
+
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseKey || 'placeholder-key'
+);

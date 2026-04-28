@@ -4,12 +4,18 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(process.cwd(), '../../'), '');
+  // Load from the root .env (2 levels up) for local development
+  const fileEnv = loadEnv(mode, path.resolve(process.cwd(), '../../'), '');
+
+  // Prefer Vercel's process.env (VITE_ prefixed), then root .env values, then empty string
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || fileEnv.SUPABASE_URL || '';
+  const supabaseKey = process.env.VITE_SUPABASE_KEY || fileEnv.SUPABASE_KEY || '';
+
   return {
     plugins: [react(), tailwindcss()],
     define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.SUPABASE_URL),
-      'import.meta.env.VITE_SUPABASE_KEY': JSON.stringify(env.SUPABASE_KEY),
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
+      'import.meta.env.VITE_SUPABASE_KEY': JSON.stringify(supabaseKey),
     }
   };
 });
