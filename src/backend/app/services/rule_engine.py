@@ -10,10 +10,12 @@ KEYWORDS = {
 }
 
 VULNERABLE = {
-    "elderly": 20,
-    "child": 20,
-    "pregnant": 25,
-    "disabled": 25
+    "elderly": 25,
+    "child": 35,
+    "infant": 70,
+    "pregnant": 75,
+    "disabled": 40,
+    "injured": 35
 }
 
 def rule_score(text: str) -> Dict[str, Any]:

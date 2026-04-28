@@ -8,7 +8,7 @@ export default function Triage() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Custom Reporter & Location State
   const [showModal, setShowModal] = useState(false);
   const [raisedBy, setRaisedBy] = useState('');
@@ -17,7 +17,7 @@ export default function Triage() {
   const [village, setVillage] = useState('');
   const [lat, setLat] = useState('16.5');
   const [lng, setLng] = useState('80.6');
-  
+
   const role = useAuthStore((state) => state.role);
   const user = useAuthStore((state) => state.user);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -96,7 +96,7 @@ export default function Triage() {
 
   return (
     <div className="flex flex-col items-center relative reveal" style={{ height: 'calc(100vh - 7rem)' }}>
-      
+
       <div className="flex-[0.8] w-full" />
 
       {/* Central Greeting */}
@@ -117,7 +117,7 @@ export default function Triage() {
       <div className="w-full max-w-2xl px-4 z-20 reveal reveal-d1 shrink-0 pb-12">
         <div className="relative group">
           <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-100 via-sky-50 to-emerald-50 rounded-[2rem] blur-md opacity-60 transition-opacity duration-500 group-focus-within:opacity-100"></div>
-          
+
           <div className="relative bg-white border border-slate-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2rem] p-3 pl-6 pr-3 flex flex-col transition-all duration-300 group-focus-within:shadow-[0_12px_40px_rgba(2,132,199,0.08)] group-focus-within:border-blue-200">
             <textarea
               ref={textareaRef}
@@ -130,9 +130,9 @@ export default function Triage() {
               className="w-full bg-transparent border-none focus:ring-0 text-[16px] text-text-primary placeholder:text-slate-400 py-3 outline-none resize-none disabled:opacity-50"
               style={{ minHeight: '56px', maxHeight: '150px' }}
             />
-            
+
             <div className="flex items-center justify-end mt-1">
-              <button 
+              <button
                 onClick={handleOpenModal}
                 disabled={!prompt.trim() || isSubmitting}
                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${prompt.trim() && !isSubmitting ? 'bg-accent hover:bg-blue-600 text-white shadow-md hover:shadow-lg' : 'bg-slate-100 text-slate-400'}`}
@@ -146,8 +146,8 @@ export default function Triage() {
         {/* Suggestions Row */}
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           {suggestions.map((s, i) => (
-            <button 
-              key={i} 
+            <button
+              key={i}
               onClick={() => setPrompt(s.text)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/60 border border-slate-200/80 text-slate-600 text-[13px] font-medium hover:bg-white hover:text-text-primary hover:shadow-sm hover:border-slate-300 transition-all shadow-sm backdrop-blur-sm"
             >
@@ -178,8 +178,42 @@ export default function Triage() {
                 <input type="text" placeholder="+91..." value={phoneNo} onChange={e => setPhoneNo(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">District</label>
-                <input type="text" placeholder="Unspecified" value={district} onChange={e => setDistrict(e.target.value)} className="bg-white/60 border border-slate-200/60 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 focus:bg-white outline-none focus:border-blue-300 shadow-sm transition-all" />
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">
+                  District
+                </label>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="bg-white border border-slate-200 rounded-xl py-2.5 px-3.5 text-[14px] text-slate-700 outline-none focus:border-blue-300 cursor-pointer"
+                >
+                  <option value="">Unspecified</option>
+                  <option>Alluri Sitharama Raju</option>
+                  <option>Anakapalli</option>
+                  <option>Anantapur</option>
+                  <option>Annamayya</option>
+                  <option>Bapatla</option>
+                  <option>Chittoor</option>
+                  <option>Dr. B.R. Ambedkar Konaseema</option>
+                  <option>East Godavari</option>
+                  <option>Eluru</option>
+                  <option>Guntur</option>
+                  <option>Kakinada</option>
+                  <option>Krishna</option>
+                  <option>Kurnool</option>
+                  <option>Nandyal</option>
+                  <option>NTR</option>
+                  <option>Palnadu</option>
+                  <option>Parvathipuram Manyam</option>
+                  <option>Prakasam</option>
+                  <option>Sri Potti Sriramulu Nellore</option>
+                  <option>Sri Sathya Sai</option>
+                  <option>Srikakulam</option>
+                  <option>Tirupati</option>
+                  <option>Visakhapatnam</option>
+                  <option>Vizianagaram</option>
+                  <option>West Godavari</option>
+                  <option>YSR Kadapa</option>
+                </select>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider ml-1">Village/Area</label>
@@ -196,13 +230,13 @@ export default function Triage() {
             </div>
 
             <div className="flex items-center justify-end gap-3">
-              <button 
+              <button
                 onClick={() => setShowModal(false)}
                 className="px-5 py-2.5 rounded-xl text-[14px] font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleFinalSubmit}
                 disabled={isSubmitting}
                 className="px-6 py-2.5 rounded-xl text-[14px] font-bold text-white bg-accent hover:bg-blue-600 shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
@@ -224,11 +258,11 @@ export default function Triage() {
           </div>
           {isLoading && <Loader2 className="w-3 h-3 text-slate-400 animate-spin" />}
         </div>
-        
+
         {notifications.slice(0, 4).map((n) => {
           const isP1 = n.priority?.toUpperCase() === 'EXTREME' || n.priority === 'Critical' || n.priority === 'P1';
           const isP2 = n.priority?.toUpperCase() === 'STRONG' || n.priority === 'High' || n.priority === 'P2';
-          
+
           return (
             <div key={n.ticket_id} className="bg-white/80 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-[1.25rem] p-4 flex flex-col gap-3 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all cursor-pointer group">
               <div className="flex items-start gap-3">
@@ -248,7 +282,7 @@ export default function Triage() {
                       {n.priority} {n.priority_score ? `(${n.priority_score})` : ''}
                     </span>
                     <span className="text-[10px] font-medium text-slate-400">
-                      {new Date(n.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                 </div>
