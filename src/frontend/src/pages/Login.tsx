@@ -13,9 +13,12 @@ export default function Login() {
   const [, setLoading] = useState(false);
 
   const [isSignUp, setIsSignUp] = useState(false);
+  const [orgName, setOrgName] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleLogin = async (role: 'ADMIN' | 'USER') => {
     setError('');
+    setSuccessMsg('');
     
     if (!email.trim() || !password.trim()) {
       setError('Please enter both your email and password.');
@@ -25,17 +28,33 @@ export default function Login() {
     setLoading(true);
 
     if (isSignUp) {
-      // Explicit sign-up flow
+      if (!orgName.trim()) {
+        setError('Please enter your organization name.');
+        setLoading(false);
+        return;
+      }
+
+      // Generate a consistent org_id from the org name (lowercase, no spaces)
+      const org_id = orgName.trim().toLowerCase().replace(/\s+/g, '-');
+
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { role: role }
+          data: { role, org_id, org_name: orgName.trim() }
         }
       });
 
       if (signUpError) {
         setError(signUpError.message);
+        setLoading(false);
+        return;
+      }
+
+      // Check if Supabase requires email confirmation
+      if (signUpData.user && !signUpData.session) {
+        setSuccessMsg('Account created! Please check your email to confirm, then sign in.');
+        setIsSignUp(false);
         setLoading(false);
         return;
       }
@@ -53,7 +72,11 @@ export default function Login() {
     });
 
     if (signInError) {
-      setError(signInError.message);
+      if (signInError.message.toLowerCase().includes('email not confirmed')) {
+        setError('Your email is not confirmed yet. Please check your inbox and click the confirmation link.');
+      } else {
+        setError(signInError.message);
+      }
       setLoading(false);
       return;
     }
@@ -124,7 +147,32 @@ export default function Login() {
               </div>
             )}
 
+            {successMsg && (
+              <div className="mb-8 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-3 text-sm text-emerald-700">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <p className="leading-relaxed">{successMsg}</p>
+              </div>
+            )}
+
             <div className="space-y-5 mb-10">
+              {isSignUp && (
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-text-secondary uppercase tracking-[0.05em] ml-1">Organization Name</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <HeartHandshake className="h-4 w-4 text-slate-400 group-focus-within:text-accent" />
+                    </div>
+                    <input
+                      type="text"
+                      value={orgName}
+                      onChange={(e) => setOrgName(e.target.value)}
+                      className="w-full glass-inset bg-white/60 rounded-2xl py-3.5 pl-11 pr-4 text-[15px] focus:bg-white transition-all shadow-sm border-white"
+                      placeholder="Red Cross, UNICEF, etc."
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-text-secondary uppercase tracking-[0.05em] ml-1">Email Address</label>
                 <div className="relative group">

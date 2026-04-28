@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { LayoutDashboard, Map as MapIcon, Database, LogOut, HeartHandshake, Sparkles } from 'lucide-react';
 
 export default function DashboardLayout() {
-  const { role, isInitialized, logout } = useAuthStore();
+  const { role, user, isInitialized, logout } = useAuthStore();
   const navigate = useNavigate();
 
   // Wait for the Supabase session check to complete before deciding
@@ -79,7 +79,9 @@ export default function DashboardLayout() {
 
           <div className="flex items-center gap-3 px-2">
             <div className="hidden sm:flex flex-col items-end justify-center">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider leading-none mb-1">Signed in as</span>
+              {user?.user_metadata?.org_name && (
+                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider leading-none mb-1">{user.user_metadata.org_name}</span>
+              )}
               <span className="text-[11px] font-extrabold tracking-widest uppercase bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md leading-none">
                 {role}
               </span>

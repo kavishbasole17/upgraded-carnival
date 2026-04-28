@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/useAuthStore';
 
 const baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -16,5 +17,15 @@ const api = axios.create({
   },
 });
 
+// Attach the org_id header to every request for data isolation
+api.interceptors.request.use((config) => {
+  const orgId = useAuthStore.getState().orgId;
+  if (orgId) {
+    config.headers['X-Org-Id'] = orgId;
+  }
+  return config;
+});
+
 export default api;
+
 

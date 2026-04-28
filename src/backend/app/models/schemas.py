@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 class Priority(str, Enum):
     EXTREME = "EXTREME"
@@ -33,3 +34,5 @@ class TicketResponse(BaseModel):
     rule_score: int
     llm_score: int
     llm_reason: str
+    org_id: Optional[str] = None
+
