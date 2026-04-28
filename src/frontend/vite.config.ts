@@ -10,12 +10,15 @@ export default defineConfig(({ mode }) => {
   // Prefer Vercel's process.env (VITE_ prefixed), then root .env values, then empty string
   const supabaseUrl = process.env.VITE_SUPABASE_URL || fileEnv.SUPABASE_URL || '';
   const supabaseKey = process.env.VITE_SUPABASE_KEY || fileEnv.SUPABASE_KEY || '';
+  const apiUrl = process.env.VITE_API_URL || fileEnv.API_URL || '';
 
   return {
     plugins: [react(), tailwindcss()],
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
       'import.meta.env.VITE_SUPABASE_KEY': JSON.stringify(supabaseKey),
+      'import.meta.env.VITE_API_URL': JSON.stringify(apiUrl),
     }
   };
 });
+
