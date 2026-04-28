@@ -116,6 +116,16 @@ export default function Login() {
               <p className="text-text-secondary text-[15px] leading-relaxed max-w-[280px]">
                 Coordinate volunteer efforts, manage critical resources, and track field missions in real-time.
               </p>
+
+              <div className="mt-8 bg-white/50 backdrop-blur-sm border border-slate-200/60 shadow-sm rounded-2xl p-4 max-w-[280px]">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.05em] mb-2">Test Credentials</p>
+                <div className="flex flex-col gap-1.5 text-[13px] text-slate-600">
+                  <div className="flex items-center justify-between"><span className="font-bold">Org:</span> <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-100 text-slate-700">UNICEF</span></div>
+                  <div className="flex items-center justify-between"><span className="font-bold">Email:</span> <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-100 text-slate-700">abc@gmail.com</span></div>
+                  <div className="flex items-center justify-between"><span className="font-bold">Pass:</span> <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-100 text-slate-700">123456789</span></div>
+                </div>
+              </div>
+              
             </div>
           </div>
 
