@@ -12,6 +12,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [, setLoading] = useState(false);
 
+  const [isSignUp, setIsSignUp] = useState(false);
+
   const handleLogin = async (role: 'ADMIN' | 'USER') => {
     setError('');
     
@@ -21,13 +23,9 @@ export default function Login() {
     }
     
     setLoading(true);
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
 
-    if (signInError) {
-      // Auto-signup for demo convenience
+    if (isSignUp) {
+      // Explicit sign-up flow
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -41,10 +39,22 @@ export default function Login() {
         setLoading(false);
         return;
       }
-      
+
       useAuthStore.getState().login(role, signUpData.user);
       setLoading(false);
       navigate(role === 'USER' ? '/triage' : '/');
+      return;
+    }
+
+    // Sign-in flow
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
       return;
     }
     
@@ -103,8 +113,8 @@ export default function Login() {
         <div className="w-full md:w-7/12 p-8 sm:p-12 lg:p-16 relative flex flex-col justify-center bg-white/60">
           <div className="max-w-[380px] w-full mx-auto">
             <div className="mb-10 text-center md:text-left">
-              <h2 className="text-2xl sm:text-[28px] font-bold tracking-tight mb-2 text-text-primary">Welcome back</h2>
-              <p className="text-[15px] text-text-secondary">Sign in to coordinate aid and resources</p>
+              <h2 className="text-2xl sm:text-[28px] font-bold tracking-tight mb-2 text-text-primary">{isSignUp ? 'Create account' : 'Welcome back'}</h2>
+              <p className="text-[15px] text-text-secondary">{isSignUp ? 'Sign up to join the relief network' : 'Sign in to coordinate aid and resources'}</p>
             </div>
 
             {error && (
@@ -153,7 +163,7 @@ export default function Login() {
 
             <div className="flex items-center gap-4 mb-8">
               <div className="flex-1 h-px bg-slate-200"></div>
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-[0.1em]">Select Role</span>
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-[0.1em]">{isSignUp ? 'Sign Up As' : 'Sign In As'}</span>
               <div className="flex-1 h-px bg-slate-200"></div>
             </div>
 
@@ -193,7 +203,13 @@ export default function Login() {
             
             <div className="mt-10 text-center md:text-left">
               <p className="text-[12px] font-medium text-text-secondary">
-                Want to register as a partner? <button className="text-accent hover:text-blue-700 font-bold transition-colors ml-1">Apply here</button>
+                {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                <button
+                  onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
+                  className="text-accent hover:text-blue-700 font-bold transition-colors ml-1"
+                >
+                  {isSignUp ? 'Sign in' : 'Sign up'}
+                </button>
               </p>
             </div>
 
