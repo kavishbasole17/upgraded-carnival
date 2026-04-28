@@ -1,7 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Fallbacks prevent the entire app from white-screening if env vars are missing on Vercel
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY || 'placeholder-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Safe fallback to prevent crash
+if (!supabaseUrl || !supabaseKey) {
+  console.error("❌ Missing Supabase env variables");
+}
+
+export const supabase = createClient(
+  supabaseUrl || "https://dummy.supabase.co",
+  supabaseKey || "dummy-key"
+);
