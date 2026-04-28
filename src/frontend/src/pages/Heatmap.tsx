@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { MapPin } from "lucide-react";
 import api from "../services/api";
 import MapLayer from "../components/MapLayer";
