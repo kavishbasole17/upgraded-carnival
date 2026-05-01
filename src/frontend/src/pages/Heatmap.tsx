@@ -28,7 +28,7 @@ export default function Heatmap() {
       const res = await api.get("/tickets");
       const tickets = res.data || [];
       const openTickets = tickets.filter(
-        (t: any) => t.status === "Open" && t.volunteer_assigned === false
+        (t: any) => t.status === "Open" && t.volunteer_assigned === false,
       );
 
       setRawTickets(openTickets);
@@ -62,7 +62,11 @@ export default function Heatmap() {
 
   // 3. Memoize filtered results
   const filteredTickets = useMemo(() => {
-    return rawTickets.filter((t) => t.district?.toUpperCase() === selectedDistrict?.toUpperCase());
+    return rawTickets
+      .filter(
+        (t) => t.district?.toUpperCase() === selectedDistrict?.toUpperCase(),
+      )
+      .sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0));
   }, [rawTickets, selectedDistrict]);
 
   const handleAssign = async (ticketId: string) => {
