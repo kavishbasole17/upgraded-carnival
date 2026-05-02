@@ -69,12 +69,46 @@ export default function Heatmap() {
       .sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0));
   }, [rawTickets, selectedDistrict]);
 
-  const handleAssign = async (ticketId: string) => {
+  const handleAssign = async (ticket: any) => {
     try {
-      await api.patch(`/tickets/${ticketId}/status`, { status: "In Progress" });
-      await fetchTickets(); // Refresh immediately after assigning
+      // 1. Fetch volunteers
+      const res = await api.get("/volunteers");
+      const volunteers = res.data || [];
+
+      // 2. Filter eligible volunteers
+      const eligible = volunteers
+        .filter(
+          (v: any) =>
+            v.availability === true &&
+            (v.current_tickets || 0) < 2 &&
+            v.district?.toLowerCase() === ticket.district?.toLowerCase(),
+        )
+        .sort(
+          (a: any, b: any) =>
+            (a.current_tickets || 0) - (b.current_tickets || 0),
+        );
+
+      if (eligible.length === 0) {
+        alert("No available volunteers in this district");
+        return;
+      }
+
+      const selected = eligible[0];
+
+      // 3. Assign ticket
+      await api.patch(`/tickets/${ticket.ticket_id}/assign`, {
+        volunteer_id: selected.id,
+      });
+
+      // 4. Update volunteer load
+      await api.patch(`/volunteers/${selected.id}`, {
+        current_tickets: (selected.current_tickets || 0) + 1,
+      });
+
+      // 5. Refresh
+      await fetchTickets();
     } catch (error) {
-      console.error("Failed to assign ticket:", error);
+      console.error("Assignment failed:", error);
     }
   };
 

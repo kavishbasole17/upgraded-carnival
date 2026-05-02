@@ -1,7 +1,8 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes.tickets import router
+from app.routes.tickets import router as ticket_router
+from app.routes.volunteers import router as volunteer_router
 from loguru import logger
 
 app = FastAPI(title='Hybrid Priority Engine')
@@ -19,7 +20,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(ticket_router)
+app.include_router(volunteer_router)
 
 @app.on_event("startup")
 async def startup_event():

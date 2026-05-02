@@ -20,8 +20,9 @@ const api = axios.create({
 // Attach the org_id header to every request for data isolation
 api.interceptors.request.use((config) => {
   const orgId = useAuthStore.getState().orgId;
+  console.log("ORG ID BEING SENT:", orgId);
   if (orgId) {
-    config.headers['X-Org-Id'] = orgId;
+    config.headers['x-org-id'] = orgId;
   }
   return config;
 });
